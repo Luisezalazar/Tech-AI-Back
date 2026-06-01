@@ -16,7 +16,7 @@ public interface IComplaintService {
 
     public void deleteComplaint(Integer id);
 
-    public void patchState(Integer id, String newState);
+    public void patchState(Integer id, String newState, Integer personId);
 
     public void patchObservations(Integer id, String newObservations);
     

@@ -6,13 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.model.Complaint;
+import com.example.demo.model.Person;
 import com.example.demo.repository.IComplaintRepository;
+import com.example.demo.repository.IPersonRepository;
 
 @Service
 public class ComplaintService implements IComplaintService {
 
     @Autowired
     IComplaintRepository complaintRepo;
+
+    @Autowired
+    IPersonRepository personRepo;
 
     @Override
     public List<Complaint> getAllComplaints() {
@@ -52,10 +57,23 @@ public class ComplaintService implements IComplaintService {
     }
 
     @Override
-    public void patchState(Integer id, String newState) {
+    public void patchState(Integer id, String newState, Integer personId) {
         Complaint comp = complaintRepo.findById(id).orElse(null);
-        comp.setState(newState);
-        this.saveComplaint(comp);
+        
+        if (comp != null) {
+            comp.setState(newState);
+            
+            if (("En Proceso".equalsIgnoreCase(newState) || "Finalizado".equalsIgnoreCase(newState)) && personId != null) {
+                Person person = personRepo.findById(personId).orElse(null);
+                
+                if (person != null) {
+                    if (!comp.getPersons().contains(person)) {
+                        comp.getPersons().add(person);
+                    }
+                }
+            }
+            this.saveComplaint(comp);
+        }
     }
 
     @Override

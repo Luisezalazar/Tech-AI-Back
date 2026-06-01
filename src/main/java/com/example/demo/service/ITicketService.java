@@ -1,10 +1,8 @@
 package com.example.demo.service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import com.example.demo.model.Ticket;
-
 
 public interface ITicketService {
 
@@ -15,6 +13,8 @@ public interface ITicketService {
     public void saveTicket(Ticket ticket);
 
     public void deleteTicket(Integer id);
-    
-    public void editTicket(Integer originalId, String newAddress, String newTeam, String newApartment, String newTechnician, LocalDate newDate, String newState, String newDescription);
+
+    public Ticket editTicket(Integer originalId, Ticket ticket);
+
+    public Ticket patchState(Integer id, String state,Integer personId);
 }

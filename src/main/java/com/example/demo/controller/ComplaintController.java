@@ -50,8 +50,9 @@ public class ComplaintController {
     }
 
     @PatchMapping("/patchState/{id}")
-    public Complaint patchState(@PathVariable Integer id, @RequestParam(required = false, name = "state") String newState) {
-        complaintService.patchState(id, newState);
+    public Complaint patchState(@PathVariable Integer id, @RequestParam(required = false, name = "state") String newState,
+            @RequestParam(required = false, name = "personId") Integer personId) {
+        complaintService.patchState(id, newState,personId);
         Complaint comp = complaintService.getComplaintById(id);
         return comp;
     }

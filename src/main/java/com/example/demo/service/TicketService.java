@@ -1,14 +1,14 @@
 package com.example.demo.service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.model.Person;
 import com.example.demo.model.Ticket;
+import com.example.demo.repository.IPersonRepository;
 import com.example.demo.repository.ITicketRepository;
-
 
 @Service
 public class TicketService implements ITicketService {
@@ -16,10 +16,12 @@ public class TicketService implements ITicketService {
     @Autowired
     ITicketRepository ticketRepo;
 
+    @Autowired
+    IPersonRepository personRepo;
+
     @Override
     public List<Ticket> getAllTickets() {
-        List<Ticket> listTicket = ticketRepo.findAll();
-        return listTicket;
+        return ticketRepo.findAll();
     }
 
     @Override
@@ -30,7 +32,6 @@ public class TicketService implements ITicketService {
     @Override
     public void saveTicket(Ticket ticket) {
         ticketRepo.save(ticket);
-        
     }
 
     @Override
@@ -39,16 +40,48 @@ public class TicketService implements ITicketService {
     }
 
     @Override
-    public void editTicket(Integer originalId, String newAddress, String newTeam, String newApartment, String newTechnician, LocalDate newDate, String newState, String newDescription) {
+    public Ticket editTicket(Integer originalId, Ticket ticket) {
         Ticket tic = this.getTicketById(originalId);
-        tic.setAddress(newAddress);
-        tic.setTeam(newTeam);
-        tic.setApartment(newApartment);
-        tic.setTechnician(newTechnician);
-        tic.setDate(newDate);
-        tic.setState(newState);
-        tic.setDescription(newDescription);
-        this.saveTicket(tic);
+
+        if (tic == null) {
+            throw new RuntimeException("Ticket not found");
+        }
+
+        tic.setAddress(ticket.getAddress());
+        tic.setTeam(ticket.getTeam());
+        tic.setApartment(ticket.getApartment());
+        tic.setTechnician(ticket.getTechnician());
+        tic.setDate(ticket.getDate());
+        tic.setState(ticket.getState());
+        tic.setDescription(ticket.getDescription());
+
+        return ticketRepo.save(tic);
     }
-    
+
+    @Override
+    public Ticket patchState(Integer id, String state, Integer personId) {
+        Ticket tic = this.getTicketById(id);
+
+        if (tic == null) {
+            throw new RuntimeException("Ticket not found");
+        }
+
+        tic.setState(state);
+
+        if (("Finalizado".equalsIgnoreCase(state) || "Fuera de servicio".equalsIgnoreCase(state)) && personId != null) {
+            Person person = personRepo.findById(personId).orElse(null);
+            
+            if (person != null) {
+                if (!tic.getPersons().contains(person)) {
+                    tic.getPersons().add(person);
+                }
+                
+                if (!person.getTickets().contains(tic)) {
+                    person.getTickets().add(tic);
+                }
+            }
+        }
+
+        return ticketRepo.save(tic);
+    }
 }
